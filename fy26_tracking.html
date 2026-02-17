@@ -3,38 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fiscal Year 2026 - Budget Tracking</title>
+    <title>FY26 Budget Tracking</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
-        .nav { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 15px 30px; color: white; display: flex; justify-content: space-between; align-items: center; }
-        .nav h1 { font-size: 1.5em; }
-        .nav-links { display: flex; gap: 15px; }
-        .nav-links a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; transition: background 0.3s; }
-        .nav-links a:hover { background: rgba(255,255,255,0.2); }
-        .nav-links a.active { background: rgba(255,255,255,0.3); }
-        .container { max-width: 1200px; margin: 50px auto; padding: 0 20px; text-align: center; }
-        .placeholder { background: white; padding: 60px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .placeholder h2 { color: #1e3c72; font-size: 2em; margin-bottom: 20px; }
-        .placeholder p { color: #666; font-size: 1.1em; line-height: 1.8; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0d0d0d; color: #e0e0e0; }
+
+        /* ── Nav ── */
+        .nav { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 16px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #4a90e2; }
+        .nav h1 { font-size: 1.4em; color: white; }
+        .nav-links { display: flex; gap: 10px; }
+        .nav-links a { color: #ccc; text-decoration: none; padding: 8px 14px; border-radius: 5px; transition: all 0.2s; font-size: 0.95em; }
+        .nav-links a:hover { background: rgba(74,144,226,0.3); color: white; }
+        .nav-links a.active { background: #4a90e2; color: white; }
+
+        /* ── Layout ── */
+        .container { max-width: 1300px; margin: 30px auto; padding: 0 20px; }
+
+        /* ── Report badge ── */
+        .report-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+        .report-badge { background: #1a2a3a; border: 1px solid #4a90e2; color: #4a90e2; padding: 6px 14px; border-radius: 20px; font-size: 0.85em; font-weight: bold; }
+        .report-file { color: #666; font-size: 0.85em; }
+
+        /* ── Stat cards ── */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 30px; }
+        .stat-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 20px; border-top: 3px solid #4a90e2; text-align: center; }
+        .stat-label { color: #888; font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+        .stat-value { font-size: 1.5em; font-weight: bold; }
+        .stat-sub { color: #666; font-size: 0.8em; margin-top: 5px; }
+
+        /* ── Section headers ── */
+        .section-title { color: #4a90e2; font-size: 1.5em; margin: 36px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #4a90e2; }
+
+        /* ── Comp cards ── */
+        .comp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+        .comp-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 22px; }
+        .comp-card h4 { color: #4a90e2; font-size: 1em; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.04em; }
+        .comp-nums { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .comp-num { text-align: center; }
+        .comp-num .label { color: #888; font-size: 0.75em; text-transform: uppercase; }
+        .comp-num .val { color: #e0e0e0; font-size: 1.1em; font-weight: bold; }
+        .comp-num .val.green { color: #50c878; }
+        .comp-num .val.red { color: #e74c3c; }
+
+        /* ── Progress bars ── */
+        .progress-wrap { display: flex; align-items: center; gap: 10px; min-width: 160px; }
+        .progress-track { flex: 1; height: 8px; background: #2a2a2a; border-radius: 4px; overflow: hidden; display: flex; }
+        .progress-fill { height: 100%; border-radius: 4px 0 0 4px; transition: width 0.4s; }
+        .progress-committed { height: 100%; opacity: 0.4; }
+        .bar-ok { background: #50c878; }
+        .bar-warn { background: #f0a500; }
+        .bar-over { background: #e74c3c; }
+        .progress-committed { background: #f0a500; }
+        .progress-label { font-size: 0.8em; color: #888; white-space: nowrap; }
+        .over-label { color: #e74c3c; font-weight: bold; }
+        .no-budget { color: #e74c3c; font-size: 0.8em; font-style: italic; }
+
+        /* ── Tables ── */
+        .section-block { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 24px; margin-bottom: 24px; }
+        .section-block h3 { color: #4a90e2; font-size: 1.1em; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+        .alert-badge { background: #3a1010; color: #e74c3c; border: 1px solid #e74c3c; font-size: 0.75em; padding: 2px 10px; border-radius: 10px; }
+        .track-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        .track-table thead tr { background: #252525; }
+        .track-table th { padding: 10px 12px; text-align: left; color: #999; font-weight: 600; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #333; }
+        .track-table td { padding: 10px 12px; border-bottom: 1px solid #222; }
+        .track-table tr:last-child td { border-bottom: none; }
+        .track-table tbody tr:hover { background: #202020; }
+        .row-over { background: #1f0d0d !important; border-left: 3px solid #e74c3c; }
+        .row-warn { background: #1e1800 !important; border-left: 3px solid #f0a500; }
+        .cat-name { font-weight: 600; color: #e0e0e0; }
+        .neg { color: #e74c3c; }
+
+        /* ── Legend ── */
+        .legend { display: flex; gap: 20px; font-size: 0.8em; color: #888; margin-top: 12px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        .footer { text-align: center; padding: 30px; color: #555; margin-top: 40px; }
     </style>
 </head>
 <body>
-    <div class="nav">
-        <h1>📊 Fiscal Year 2026</h1>
-        <div class="nav-links">
-            <a href="index.html">🏠 Home</a>
-            <a href="fy26_budget.html">💰 Budget View</a>
-            <a href="fy26_tracking.html" class="active">📈 Tracking</a>
+
+<div class="nav">
+    <h1>📊 Fiscal Year 2026</h1>
+    <div class="nav-links">
+        <a href="index.html">🏠 Home</a>
+        <a href="fy26_budget.html">💰 Budget View</a>
+        <a href="fy26_tracking.html" class="active">📈 Tracking</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="report-meta">
+        <span class="report-badge">📅 Fine Arts December Summary Report</span>
+        <span class="report-file">Source: FY26 FNAR DECEMBER SUMMARY REPORT.xlsx</span>
+    </div>
+
+    <!-- ── Overall KPIs ── -->
+    <div class="stats-row">
+        
+    <div class='stat-card'>
+        <div class='stat-label'>TOTAL BUDGET</div>
+        <div class='stat-value' style='color:#50c878'>$4,208,603.00</div>
+        <div class="stat-sub">FY26 Approved</div>
+    </div>
+        
+    <div class='stat-card'>
+        <div class='stat-label'>FYTD ACTUALS</div>
+        <div class='stat-value' style='color:#4a90e2'>$2,088,600.71</div>
+        <div class="stat-sub">49.6% of budget</div>
+    </div>
+        
+    <div class='stat-card'>
+        <div class='stat-label'>COMMITTED</div>
+        <div class='stat-value' style='color:#f0a500'>$1,583,893.09</div>
+        <div class="stat-sub">Encumbered funds</div>
+    </div>
+        
+    <div class='stat-card'>
+        <div class='stat-label'>AVAILABLE BALANCE</div>
+        <div class='stat-value' style='color:#50c878'>$536,109.20</div>
+        <div class="stat-sub">Unspent + uncommitted</div>
+    </div>
+    </div>
+
+    
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-warn' style='width:49.6%'></div>
+            <div class='progress-committed' style='width:37.6%'></div>
+        </div>
+        <span class='progress-label '>49.6% spent</span>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#50c878"></div> Spent (FYTD Actuals)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f0a500"></div> Committed</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div> Over budget</div>
+    </div>
+
+    <!-- ── Compensation ── -->
+    <h2 class="section-title">Compensation</h2>
+
+    <div class="comp-row">
+        <div class="comp-card">
+            <h4>Academic Salaries</h4>
+            <div class="comp-nums">
+                <div class="comp-num"><div class="label">Budget</div><div class="val">$2,342,729.00</div></div>
+                <div class="comp-num"><div class="label">FYTD Actual</div><div class="val green">$1,213,663.36</div></div>
+                <div class="comp-num"><div class="label">Committed</div><div class="val">$836,089.59</div></div>
+                <div class="comp-num"><div class="label">Available</div>
+                    <div class="val green">$292,976.05</div></div>
+            </div>
+            
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-warn' style='width:51.8%'></div>
+            <div class='progress-committed' style='width:35.7%'></div>
+        </div>
+        <span class='progress-label '>51.8% spent</span>
+    </div>
+        </div>
+        <div class="comp-card">
+            <h4>Non-Academic Salaries</h4>
+            <div class="comp-nums">
+                <div class="comp-num"><div class="label">Budget</div><div class="val">$715,482.00</div></div>
+                <div class="comp-num"><div class="label">FYTD Actual</div><div class="val green">$325,848.82</div></div>
+                <div class="comp-num"><div class="label">Committed</div><div class="val">$353,977.34</div></div>
+                <div class="comp-num"><div class="label">Available</div>
+                    <div class="val green">$35,655.84</div></div>
+            </div>
+            
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-warn' style='width:45.5%'></div>
+            <div class='progress-committed' style='width:49.5%'></div>
+        </div>
+        <span class='progress-label '>45.5% spent</span>
+    </div>
         </div>
     </div>
 
-    <div class="container">
-        <div class="placeholder">
-            <h2>📈 Budget Tracking</h2>
-            <p>Tracking view for Fiscal Year 2026 will be available once monthly reports are uploaded.</p>
-            <p style="margin-top: 20px;">Upload monthly summary reports to track actual spending against the master budget.</p>
-        </div>
+    <!-- ── Current Expenses ── -->
+    <h2 class="section-title">Current Expenses</h2>
+
+    <div class="stats-row">
+        
+    <div class='stat-card'>
+        <div class='stat-label'>UG ACTUALS</div>
+        <div class='stat-value' style='color:#3498db'>$72,207.03</div>
+        <div class="stat-sub">44.4% of UG budget</div>
     </div>
+        
+    <div class='stat-card'>
+        <div class='stat-label'>GRAD ACTUALS</div>
+        <div class='stat-value' style='color:#9b59b6'>$51,626.30</div>
+        <div class="stat-sub">31.8% of Grad budget</div>
+    </div>
+        
+    <div class='stat-card'>
+        <div class='stat-label'>CE TOTAL ACTUAL</div>
+        <div class='stat-value' style='color:#50c878'>$123,898.09</div>
+        <div class="stat-sub">37.6% of CE budget</div>
+    </div>
+        
+    <div class='stat-card'>
+        <div class='stat-label'>CE AVAILABLE</div>
+        <div class='stat-value' style='color:#50c878'>$192,741.08</div>
+        <div class="stat-sub">Remaining current expense</div>
+    </div>
+    </div>
+
+    <div class='section-block'><h3>Undergraduate Expense Categories <span class='alert-badge'>2 over budget</span></h3><table class='track-table'><thead><tr><th>Category</th><th>Budget</th><th>FYTD Actual</th><th>Committed</th><th>Available</th><th>Progress</th></tr></thead><tbody><tr class='row-over'><td class='cat-name'>Section 0.0</td><td>$866,268.00</td><td>$478,673.04</td><td>$480,761.55</td><td class='neg'>$-93,166.59</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-over' style='width:55.3%'></div>
+            <div class='progress-committed' style='width:44.7%'></div>
+        </div>
+        <span class='progress-label over-label'>55.3% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Section 0.0</td><td>$1,364,461.00</td><td>$699,614.02</td><td>$340,651.74</td><td class=''>$324,195.24</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:51.3%'></div>
+            <div class='progress-committed' style='width:25.0%'></div>
+        </div>
+        <span class='progress-label '>51.3% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Studios/Courses</td><td>—</td><td>$800.00</td><td>—</td><td class='neg'>$-800.00</td><td><div class='progress-wrap'><span class='no-budget'>No budget allocated — $800.00 spent</span></div></td></tr><tr class=''><td class='cat-name'>Printmaking</td><td>—</td><td>$9,600.00</td><td>—</td><td class='neg'>$-9,600.00</td><td><div class='progress-wrap'><span class='no-budget'>No budget allocated — $9,600.00 spent</span></div></td></tr><tr class=''><td class='cat-name'>Section 0.0</td><td>$494,910.00</td><td>$179,759.04</td><td>$212,176.36</td><td class=''>$102,974.60</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:36.3%'></div>
+            <div class='progress-committed' style='width:42.9%'></div>
+        </div>
+        <span class='progress-label '>36.3% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Studios/Courses</td><td>—</td><td>$200.00</td><td>—</td><td class='neg'>$-200.00</td><td><div class='progress-wrap'><span class='no-budget'>No budget allocated — $200.00 spent</span></div></td></tr><tr class=''><td class='cat-name'>Section 0.0</td><td>—</td><td>$6.06</td><td>—</td><td class='neg'>$-6.06</td><td><div class='progress-wrap'><span class='no-budget'>No budget allocated — $6.06 spent</span></div></td></tr><tr class=''><td class='cat-name'>Studios/Courses</td><td>$12,600.00</td><td>$3,906.36</td><td>$159.20</td><td class=''>$8,534.44</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:31.0%'></div>
+            <div class='progress-committed' style='width:1.3%'></div>
+        </div>
+        <span class='progress-label '>31.0% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Chair Expenses</td><td>$10,000.00</td><td>$1,902.38</td><td>—</td><td class=''>$8,097.62</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:19.0%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>19.0% spent</span>
+    </div></td></tr><tr class='row-warn'><td class='cat-name'>Department Administrative</td><td>$16,000.00</td><td>$9,677.06</td><td>$4,608.14</td><td class=''>$1,714.80</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-warn' style='width:60.5%'></div>
+            <div class='progress-committed' style='width:28.8%'></div>
+        </div>
+        <span class='progress-label '>60.5% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Promotion of Department</td><td>$7,000.00</td><td>$1,413.00</td><td>—</td><td class=''>$5,587.00</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:20.2%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>20.2% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Departmental Events</td><td>$25,200.00</td><td>$2,926.04</td><td>$632.42</td><td class=''>$21,641.54</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:11.6%'></div>
+            <div class='progress-committed' style='width:2.5%'></div>
+        </div>
+        <span class='progress-label '>11.6% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Exhibitions</td><td>—</td><td>$9,587.31</td><td>—</td><td class='neg'>$-9,587.31</td><td><div class='progress-wrap'><span class='no-budget'>No budget allocated — $9,587.31 spent</span></div></td></tr><tr class=''><td class='cat-name'>Painting/Drawing</td><td>$10,750.00</td><td>$3,258.91</td><td>—</td><td class=''>$7,491.09</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:30.3%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>30.3% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Printmaking</td><td>$10,000.00</td><td>$6,819.43</td><td>—</td><td class=''>$3,180.57</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:68.2%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>68.2% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Sculpture</td><td>$8,400.00</td><td>$5,234.01</td><td>$49.09</td><td class=''>$3,116.90</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:62.3%'></div>
+            <div class='progress-committed' style='width:0.6%'></div>
+        </div>
+        <span class='progress-label '>62.3% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Video</td><td>$2,000.00</td><td>$0.00</td><td>—</td><td class=''>$2,000.00</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:0.0%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>0.0% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Animation</td><td>$8,400.00</td><td>$5,407.59</td><td>$10.11</td><td class=''>$2,982.30</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:64.4%'></div>
+            <div class='progress-committed' style='width:0.1%'></div>
+        </div>
+        <span class='progress-label '>64.4% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Digital Design</td><td>$11,950.00</td><td>$4,134.51</td><td>$75.35</td><td class=''>$7,740.14</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:34.6%'></div>
+            <div class='progress-committed' style='width:0.6%'></div>
+        </div>
+        <span class='progress-label '>34.6% spent</span>
+    </div></td></tr><tr class='row-over'><td class='cat-name'>Photography Instructional</td><td>$2,500.00</td><td>$2,933.74</td><td>—</td><td class='neg'>$-433.74</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-over' style='width:100.0%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label over-label'>117.3% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Photography Consumables</td><td>$22,500.00</td><td>$12,876.16</td><td>—</td><td class=''>$9,623.84</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:57.2%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>57.2% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Senior Seminar</td><td>$15,400.00</td><td>$2,124.47</td><td>—</td><td class=''>$13,275.53</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:13.8%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>13.8% spent</span>
+    </div></td></tr></tbody></table></div>
+    <div class='section-block'><h3>Graduate Expense Categories <span class='alert-badge'>1 over budget</span></h3><table class='track-table'><thead><tr><th>Category</th><th>Budget</th><th>FYTD Actual</th><th>Committed</th><th>Available</th><th>Progress</th></tr></thead><tbody><tr class=''><td class='cat-name'>Section 0.0</td><td>$112,000.00</td><td>$24,626.30</td><td>$14,676.30</td><td class=''>$72,697.40</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:22.0%'></div>
+            <div class='progress-committed' style='width:13.1%'></div>
+        </div>
+        <span class='progress-label '>22.0% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Studios/Courses</td><td>—</td><td>$350.00</td><td>—</td><td class='neg'>$-350.00</td><td><div class='progress-wrap'><span class='no-budget'>No budget allocated — $350.00 spent</span></div></td></tr><tr class=''><td class='cat-name'>Section 0.0</td><td>—</td><td>$80,262.36</td><td>$80,262.36</td><td class='neg'>$-160,524.72</td><td><div class='progress-wrap'><span class='no-budget'>No budget allocated — $80,262.36 spent</span></div></td></tr><tr class=''><td class='cat-name'>Section 0.0</td><td>$220,572.00</td><td>$65,627.42</td><td>$61,538.62</td><td class=''>$93,405.96</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:29.8%'></div>
+            <div class='progress-committed' style='width:27.9%'></div>
+        </div>
+        <span class='progress-label '>29.8% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Section 0.0</td><td>$4,120.00</td><td>$64.76</td><td>—</td><td class=''>$4,055.24</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:1.6%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>1.6% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Studios/Courses</td><td>$70,000.00</td><td>$8,454.85</td><td>—</td><td class=''>$61,545.15</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:12.1%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>12.1% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Chair Expenses</td><td>$2,000.00</td><td>$0.00</td><td>—</td><td class=''>$2,000.00</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:0.0%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>0.0% spent</span>
+    </div></td></tr><tr class='row-over'><td class='cat-name'>Department Administrative</td><td>$6,000.00</td><td>$7,682.52</td><td>$3,366.73</td><td class='neg'>$-5,049.25</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-over' style='width:100.0%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label over-label'>128.0% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Admissions & Recruitment</td><td>$10,000.00</td><td>$0.00</td><td>—</td><td class=''>$10,000.00</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:0.0%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>0.0% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Promotion of Department</td><td>$15,000.00</td><td>$802.11</td><td>$195.75</td><td class=''>$14,002.14</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:5.3%'></div>
+            <div class='progress-committed' style='width:1.3%'></div>
+        </div>
+        <span class='progress-label '>5.3% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Departmental Events</td><td>$10,000.00</td><td>$4,713.87</td><td>—</td><td class=''>$5,286.13</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:47.1%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>47.1% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Lecture Series</td><td>$24,300.00</td><td>$9,526.79</td><td>$461.04</td><td class=''>$14,312.17</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:39.2%'></div>
+            <div class='progress-committed' style='width:1.9%'></div>
+        </div>
+        <span class='progress-label '>39.2% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>Sculpture</td><td>—</td><td>$6,978.55</td><td>$198.00</td><td class='neg'>$-7,176.55</td><td><div class='progress-wrap'><span class='no-budget'>No budget allocated — $6,978.55 spent</span></div></td></tr><tr class=''><td class='cat-name'>MFA Thesis Exhibition</td><td>$25,000.00</td><td>$2,114.50</td><td>—</td><td class=''>$22,885.50</td><td>
+    <div class='progress-wrap'>
+        <div class='progress-track'>
+            <div class='progress-fill bar-ok' style='width:8.5%'></div>
+            <div class='progress-committed' style='width:0.0%'></div>
+        </div>
+        <span class='progress-label '>8.5% spent</span>
+    </div></td></tr><tr class=''><td class='cat-name'>MFA Senior Critics</td><td>—</td><td>$3,600.00</td><td>$2,725.00</td><td class='neg'>$-6,325.00</td><td><div class='progress-wrap'><span class='no-budget'>No budget allocated — $3,600.00 spent</span></div></td></tr><tr class=''><td class='cat-name'>MFA Reviews</td><td>—</td><td>$7,170.59</td><td>—</td><td class='neg'>$-7,170.59</td><td><div class='progress-wrap'><span class='no-budget'>No budget allocated — $7,170.59 spent</span></div></td></tr><tr class=''><td class='cat-name'>MFA Workshops</td><td>—</td><td>$582.52</td><td>—</td><td class='neg'>$-582.52</td><td><div class='progress-wrap'><span class='no-budget'>No budget allocated — $582.52 spent</span></div></td></tr></tbody></table></div>
+
+</div>
+
+<div class="footer">
+    <p><strong>Fine Arts Department Budget Tracking</strong></p>
+    <p>FY26 · Generated from FY26 FNAR DECEMBER SUMMARY REPORT.xlsx</p>
+</div>
+
 </body>
 </html>
