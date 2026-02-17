@@ -44,121 +44,112 @@ def safe_str(v):
 def parse_tracking_file(path):
     """
     Parse the Monthly Department Summary sheet.
-    Returns a structured dict with all key sections.
+
+    Structure rules (confirmed from actual file):
+      - Col A(0) B(1) C(2) D(3) E(4) F(5) G(6) H(7) I(8)
+      - Charge rows:  B='F A UNDERGRAD', C=section code, D=category name, E=charge type
+      - Total rows:   A=blank, B=blank, C=section code, D=blank, E=blank,
+                      F=Budget, G=Spent (FYTD), H=Committed, I=Available
+      - UG fund total: A='4118', B='UGRAD FNAR ...'
+      - Grad section starts at A='4119'
     """
     df = pd.read_excel(path, sheet_name='Monthly Department Summary', header=None)
 
-    # Column indices: 5=Budget, 6=FYTD Actuals, 7=Committed, 8=Available, 9=% used
-    B, A, C, AV, PCT = 5, 6, 7, 8, 9
+    def c(i, col):
+        """Safe cell read."""
+        return safe_str(df.iloc[i, col]) if df.shape[1] > col else ''
 
-    def row(i):
-        """Return dict for row i (0-indexed)."""
+    def nums(i):
         return {
-            'label':     safe_str(df.iloc[i, 4]) if df.shape[1] > 4 else '',
-            'cat':       safe_str(df.iloc[i, 3]) if df.shape[1] > 3 else '',
-            'section':   safe_float(df.iloc[i, 2]) if df.shape[1] > 2 else 0,
-            'fund':      safe_str(df.iloc[i, 1]) if df.shape[1] > 1 else '',
-            'budget':    safe_float(df.iloc[i, B]) if df.shape[1] > B else 0,
-            'actuals':   safe_float(df.iloc[i, A]) if df.shape[1] > A else 0,
-            'committed': safe_float(df.iloc[i, C]) if df.shape[1] > C else 0,
-            'available': safe_float(df.iloc[i, AV]) if df.shape[1] > AV else 0,
+            'budget':    safe_float(df.iloc[i, 5]),
+            'actuals':   safe_float(df.iloc[i, 6]),
+            'committed': safe_float(df.iloc[i, 7]),
+            'available': safe_float(df.iloc[i, 8]),
         }
 
-    # ── Detect report period from row 2 ──────────────────────────────────────
-    period = safe_str(df.iloc[1, 0])
+    # ── Report period ─────────────────────────────────────────────────────────
+    period = c(1, 0) or c(0, 0)
 
-    # ── Subtotals rows (search by label) ─────────────────────────────────────
-    def find_row(label_col, pattern, start=0):
-        """Find first row where column label_col matches pattern (case-insensitive)."""
+    # ── Helper: find first row matching a pattern ─────────────────────────────
+    def find_row(col, pattern, start=0):
         for i in range(start, len(df)):
-            v = safe_str(df.iloc[i, label_col])
-            if pattern.lower() in v.lower():
+            if pattern.lower() in c(i, col).lower():
                 return i
         return None
 
-    academic_row    = find_row(4, 'Academic Salaries')
-    nonacademic_row = find_row(4, 'Non-Academic Salaries')
-    ce_total_row    = find_row(0, 'Subtotal - Current Expense')
-    total_exp_row   = find_row(0, 'TOTAL EXPENDITURES')
+    # ── Compensation subtotals ────────────────────────────────────────────────
+    ac_row = find_row(4, 'Academic Salaries')
+    na_row = find_row(4, 'Non-Academic Salaries')
+    te_row = find_row(0, 'TOTAL EXPENDITURES')
 
-    academic    = row(academic_row)    if academic_row    is not None else {}
-    nonacademic = row(nonacademic_row) if nonacademic_row is not None else {}
-    ce_total    = row(ce_total_row)    if ce_total_row    is not None else {}
-    total_exp   = row(total_exp_row)   if total_exp_row   is not None else {}
+    academic    = {**nums(ac_row), 'name': 'Academic Salaries'}    if ac_row is not None else {}
+    nonacademic = {**nums(na_row), 'name': 'Non-Academic Salaries'} if na_row is not None else {}
+    total_exp   = {**nums(te_row), 'name': 'Total Expenditures'}   if te_row is not None else {}
 
-    # ── UG current expense categories (section subtotals) ────────────────────
-    # Identified by rows where col2 has a section number and col1 = 'F A UNDERGRAD'
-    # and col0 is blank (subtotal rows)
+    # ── Locate UG current expense section ────────────────────────────────────
+    # Find CURRENT EXPENSE header, then the 4118 fund row within it.
+    # Row structure (confirmed):
+    #   Row 62: A='4118', B='F A UNDERGRAD', C='0.0' → first row of UG block
+    #   Row 137: A='4118', B='UGRAD FNAR', C='' → fund-level total (ug_end)
+    ce_start = find_row(0, 'CURRENT EXPENSE')
+    ug_start = None
+    ug_end   = None
+    if ce_start is not None:
+        for i in range(ce_start, len(df)):
+            a = c(i, 0)
+            b = c(i, 1)
+            # First row with A='4118' in the CE section opens the UG block
+            if a == '4118' and ug_start is None:
+                ug_start = i
+            # Fund-level total: A='4118', C='', has budget in F
+            if (a == '4118' and c(i, 2) == '' and c(i, 5)
+                    and ('UGRAD' in b.upper() or 'UNDERGRAD' in b.upper())):
+                ug_end = i
+                break
+            # Grad section starts — UG is done
+            if a == '4119':
+                if ug_end is None:
+                    ug_end = i
+                break
+
+    # ── Parse UG categories ───────────────────────────────────────────────────
+    # Total rows: A=blank, B=blank, C=code (not '0.0'), D=blank, E=blank
+    # Exclude the '0.0' general section; exclude fund total rows (A has value)
     ug_cats = []
-    grad_cats = []
+    cat_name = ''
 
-    cat_map = {
-        '50.0':  'Studios/Courses',
-        '54.0':  'Chair Expenses',
-        '55.0':  'Department Administrative',
-        '56.0':  'Admissions & Recruitment',
-        '58.0':  'Promotion of Department',
-        '61.0':  'Departmental Events',
-        '62.0':  'Lecture Series',
-        '503.0': 'Exhibitions',
-        '505.0': 'Painting/Drawing',
-        '506.0': 'Printmaking',
-        '507.0': 'Sculpture',
-        '509.0': 'Video',
-        '511.0': 'Animation',
-        '513.0': 'Digital Design',
-        '515.0': 'Photography Instructional',
-        '548.0': 'MFA Thesis Exhibition',
-        '561.0': 'MFA Senior Critics',
-        '562.0': 'MFA Reviews',
-        '565.0': 'MFA Workshops',
-        '569.0': 'Photography Consumables',
-        '592.0': 'Senior Seminar',
-    }
+    if ug_start is not None and ug_end is not None:
+        for i in range(ug_start, ug_end):
+            a = c(i, 0)
+            b = c(i, 1)
+            code = c(i, 2)
+            name_col = c(i, 3)
+            charge = c(i, 4)
 
-    for i in range(len(df)):
-        c0 = safe_str(df.iloc[i, 0])
-        c1 = safe_str(df.iloc[i, 1])
-        c2 = safe_str(df.iloc[i, 2])
-        # Subtotal rows have blank c0, section number in c2, no line item label in c4
-        if c0 == '' and c2 and c2 != '' and safe_str(df.iloc[i, 4]) == '':
-            section_key = c2 if c2.endswith('.0') else c2 + '.0'
-            name = cat_map.get(section_key, f'Section {c2}')
-            r = row(i)
-            r['name'] = name
-            r['section_code'] = c2
+            # First charge row of a new category introduces its name in col D
+            if b == 'F A UNDERGRAD' and code and name_col:
+                cat_name = name_col
 
-            # Determine if UG or Grad based on nearby fund column
-            if 'UNDERGRAD' in c1.upper() or 'UGRAD' in c1.upper():
-                ug_cats.append(r)
-            elif 'GRADUATE' in c1.upper() or 'GRAD' in c1.upper():
-                grad_cats.append(r)
-            elif c1 == '':
-                # Look above for fund context
-                for look in range(i - 1, max(i - 10, -1), -1):
-                    fc = safe_str(df.iloc[look, 1])
-                    if 'UNDERGRAD' in fc.upper() or 'UGRAD' in fc.upper():
-                        ug_cats.append(r)
-                        break
-                    elif 'GRADUATE' in fc.upper() or 'GRAD' in fc.upper():
-                        grad_cats.append(r)
-                        break
+            # Total row: A blank, B blank, C=code, D blank, E blank
+            is_total = (a == '' and b == '' and code not in ('', '0.0')
+                        and name_col == '' and charge == '')
+            if is_total:
+                ug_cats.append({
+                    'name':    cat_name,
+                    'code':    code.replace('.0', ''),
+                    **nums(i),
+                })
+                cat_name = ''   # reset for next category
 
-    # ── UG and Grad totals (the fund-level rollup rows) ───────────────────────
+    # ── UG fund total ─────────────────────────────────────────────────────────
     ug_total = {}
-    grad_total = {}
-    for i in range(len(df)):
-        c0 = safe_str(df.iloc[i, 0])
-        c1 = safe_str(df.iloc[i, 1])
-        # Fund total rows have the fund code in c0 (like '4118') and a label in c1
-        if c0 in ('4118',) and ('UGRAD' in c1.upper() or 'UNDERGRAD' in c1.upper()):
-            ug_total = row(i)
-            ug_total['name'] = 'Undergraduate Total'
-        elif c0 in ('4119',) and ('GRAD' in c1.upper()):
-            grad_total = row(i)
-            grad_total['name'] = 'Graduate Total'
+    if ug_end is not None and c(ug_end, 0) == '4118':
+        ug_total = {**nums(ug_end), 'name': 'Undergraduate Total'}
 
-    # ── Final compilation ─────────────────────────────────────────────────────
+    # ── CE subtotal ───────────────────────────────────────────────────────────
+    ce_row = find_row(0, 'Subtotal - Current Expense')
+    ce_total = {**nums(ce_row), 'name': 'Current Expense Total'} if ce_row is not None else {}
+
     return {
         'period':      period,
         'file_name':   Path(path).name,
@@ -167,9 +158,7 @@ def parse_tracking_file(path):
         'ce_total':    ce_total,
         'total_exp':   total_exp,
         'ug_cats':     ug_cats,
-        'grad_cats':   grad_cats,
         'ug_total':    ug_total,
-        'grad_total':  grad_total,
     }
 
 
@@ -270,13 +259,11 @@ def generate_tracking_page(data):
     na = data['nonacademic']
     ce = data['ce_total']
     ug = data['ug_total']
-    gr = data['grad_total']
 
     total_spent_pct = pct(t.get('actuals', 0), t.get('budget', 0))
     pct_label = f'{total_spent_pct:.1f}%' if total_spent_pct is not None else 'N/A'
 
-    ug_cats_html   = section_table('Undergraduate Expense Categories', data['ug_cats'])
-    grad_cats_html = section_table('Graduate Expense Categories', data['grad_cats'])
+    ug_cats_html = section_table('Undergraduate Current Expense Categories', data['ug_cats'])
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -428,15 +415,14 @@ def generate_tracking_page(data):
     <h2 class="section-title">Current Expenses</h2>
 
     <div class="stats-row">
-        {stat_card('UG ACTUALS',   fmt(ug.get('actuals',0)), f"{pct(ug.get('actuals',0), ug.get('budget',0)) or 0:.1f}% of UG budget", '#3498db')}
-        {stat_card('GRAD ACTUALS', fmt(gr.get('actuals',0)), f"{pct(gr.get('actuals',0), gr.get('budget',0)) or 0:.1f}% of Grad budget", '#9b59b6')}
-        {stat_card('CE TOTAL ACTUAL', fmt(ce.get('actuals',0)), f"{pct(ce.get('actuals',0), ce.get('budget',0)) or 0:.1f}% of CE budget")}
-        {stat_card('CE AVAILABLE',    fmt(ce.get('available',0)), 'Remaining current expense',
+        {stat_card('UG ACTUALS',      fmt(ug.get('actuals',0)),  f"{pct(ug.get('actuals',0), ug.get('budget',0)) or 0:.1f}% of UG budget", '#3498db')}
+        {stat_card('UG BUDGET',       fmt(ug.get('budget',0)),   'Undergraduate allocation', '#4a90e2')}
+        {stat_card('CE TOTAL ACTUAL', fmt(ce.get('actuals',0)),  f"{pct(ce.get('actuals',0), ce.get('budget',0)) or 0:.1f}% of CE budget")}
+        {stat_card('CE AVAILABLE',    fmt(ce.get('available',0)),'Remaining current expense',
                    '#e74c3c' if ce.get('available',0) < 0 else '#50c878')}
     </div>
 
     {ug_cats_html}
-    {grad_cats_html}
 
 </div>
 
@@ -458,7 +444,7 @@ def main():
     print(f"Period: {data['period']}")
     print(f"Total expenditures: budget={fmt(data['total_exp'].get('budget',0))} "
           f"actuals={fmt(data['total_exp'].get('actuals',0))}")
-    print(f"UG categories: {len(data['ug_cats'])}   Grad categories: {len(data['grad_cats'])}")
+    print(f"UG categories: {len(data['ug_cats'])}")
 
     html = generate_tracking_page(data)
 
