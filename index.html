@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fine Arts Budget System - All Fiscal Years</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 50px 30px; text-align: center; }
+        .header h1 { font-size: 3em; margin-bottom: 15px; }
+        .header p { font-size: 1.2em; opacity: 0.9; }
+        .content { padding: 50px 30px; }
+        .intro { text-align: center; margin-bottom: 40px; }
+        .intro h2 { color: #1e3c72; margin-bottom: 15px; }
+        .intro p { color: #666; font-size: 1.1em; }
+        .fy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; margin: 40px 0; }
+        .fy-card { background: white; border: 3px solid #e0e0e0; border-radius: 10px; padding: 25px; transition: all 0.3s; }
+        .fy-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-color: #667eea; }
+        .fy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .fy-header h3 { color: #1e3c72; font-size: 1.4em; }
+        .badge { background: #28a745; color: white; padding: 5px 12px; border-radius: 15px; font-size: 0.8em; font-weight: bold; }
+        .fy-period { color: #666; margin-bottom: 20px; font-size: 0.95em; }
+        .fy-actions { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 12px 20px; text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; transition: all 0.3s; }
+        .btn-budget { background: #f0f7ff; color: #1e3c72; border: 2px solid #1e3c72; }
+        .btn-budget:hover { background: #1e3c72; color: white; }
+        .btn-tracking { background: #667eea; color: white; border: 2px solid #667eea; }
+        .btn-tracking:hover { background: #5568d3; transform: scale(1.02); }
+        .footer { background: #f8f9fa; padding: 30px; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Fine Arts Budget System</h1>
+            <p>Multi-Year Budget Management | All Fiscal Years</p>
+            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.8;">Last Updated: February 16, 2026</p>
+        </div>
+
+        <div class="content">
+            <div class="intro">
+                <h2>Select a Fiscal Year</h2>
+                <p>View budget details and track spending for any fiscal year below</p>
+            </div>
+
+            <div class="fy-grid">
+                
+        <div class="fy-card">
+            <div class="fy-header">
+                <h3>Fiscal Year 2026</h3>
+                <span class="badge">🟢 Active ⭐ Current</span>
+            </div>
+            <p class="fy-period">July 1, 2025 - June 30, 2026</p>
+            <div class="fy-actions">
+                <a href="fy26_budget.html" class="btn btn-budget">💰 View Budget</a>
+                <a href="fy26_tracking.html" class="btn btn-tracking">📈 View Tracking</a>
+            </div>
+        </div>
+        
+        <div class="fy-card">
+            <div class="fy-header">
+                <h3>Fiscal Year 2025</h3>
+                <span class="badge">🟢 Active</span>
+            </div>
+            <p class="fy-period">July 1, 2024 - June 30, 2025</p>
+            <div class="fy-actions">
+                <a href="fy25_budget.html" class="btn btn-budget">💰 View Budget</a>
+                <a href="fy25_tracking.html" class="btn btn-tracking">📈 View Tracking</a>
+            </div>
+        </div>
+        
+        <div class="fy-card">
+            <div class="fy-header">
+                <h3>Fiscal Year 2024</h3>
+                <span class="badge">🟢 Active</span>
+            </div>
+            <p class="fy-period">July 1, 2023 - June 30, 2024</p>
+            <div class="fy-actions">
+                <a href="fy24_budget.html" class="btn btn-budget">💰 View Budget</a>
+                <a href="fy24_tracking.html" class="btn btn-tracking">📈 View Tracking</a>
+            </div>
+        </div>
+        
+        <div class="fy-card">
+            <div class="fy-header">
+                <h3>Fiscal Year 2023</h3>
+                <span class="badge">🟢 Active</span>
+            </div>
+            <p class="fy-period">July 1, 2022 - June 30, 2023</p>
+            <div class="fy-actions">
+                <a href="fy23_budget.html" class="btn btn-budget">💰 View Budget</a>
+                <a href="fy23_tracking.html" class="btn btn-tracking">📈 View Tracking</a>
+            </div>
+        </div>
+        
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Fine Arts Multi-Year Budget System</strong></p>
+            <p>School of Design | 4 Fiscal Years Available</p>
+        </div>
+    </div>
+</body>
+</html>

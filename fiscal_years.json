@@ -1,0 +1,49 @@
+{
+  "fiscal_years": [
+    {
+      "year": "FY26",
+      "label": "Fiscal Year 2026",
+      "period": "July 1, 2025 - June 30, 2026",
+      "master_budget_file": "/Users/KLAW/project/budget/FY/fy26.xlsx",
+      "latest_report_file": null,
+      "latest_report_month": null,
+      "months_elapsed": 0,
+      "status": "active",
+      "added": "2026-02-16"
+    },
+    {
+      "year": "FY25",
+      "label": "Fiscal Year 2025",
+      "period": "July 1, 2024 - June 30, 2025",
+      "master_budget_file": "/Users/KLAW/project/budget/FY/fy25.xlsx",
+      "latest_report_file": null,
+      "latest_report_month": null,
+      "months_elapsed": 0,
+      "status": "active",
+      "added": "2026-02-16"
+    },
+    {
+      "year": "FY24",
+      "label": "Fiscal Year 2024",
+      "period": "July 1, 2023 - June 30, 2024",
+      "master_budget_file": "/Users/KLAW/project/budget/FY/fy24.xlsx",
+      "latest_report_file": null,
+      "latest_report_month": null,
+      "months_elapsed": 0,
+      "status": "active",
+      "added": "2026-02-16"
+    },
+    {
+      "year": "FY23",
+      "label": "Fiscal Year 2023",
+      "period": "July 1, 2022 - June 30, 2023",
+      "master_budget_file": "/Users/KLAW/project/budget/FY/FY23.xlsx",
+      "latest_report_file": null,
+      "latest_report_month": null,
+      "months_elapsed": 0,
+      "status": "active",
+      "added": "2026-02-16"
+    }
+  ],
+  "current_fiscal_year": "FY26"
+}

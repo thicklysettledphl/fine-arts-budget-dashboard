@@ -1,0 +1,21 @@
+# Excel files (contain sensitive budget data)
+*.xlsx
+*.xls
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.bak

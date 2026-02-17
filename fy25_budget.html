@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiscal Year 2025 - Master Budget</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
+        .nav { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 15px 30px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .nav h1 { font-size: 1.5em; }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-links a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; transition: background 0.3s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
+        .nav-links a.active { background: rgba(255,255,255,0.3); }
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        .info-box { background: white; padding: 25px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .info-box h2 { color: #1e3c72; margin-bottom: 15px; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .info-item { background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .info-item h3 { color: #667eea; font-size: 0.9em; margin-bottom: 5px; }
+        .info-item p { color: #1e3c72; font-size: 1.4em; font-weight: bold; }
+        .chart-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <h1>📊 Fiscal Year 2025</h1>
+        <div class="nav-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="fy25_budget.html" class="active">💰 Budget View</a>
+            <a href="fy25_tracking.html">📈 Tracking</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="info-box">
+            <h2>Master Budget Overview</h2>
+            <p style="color: #666; margin-bottom: 20px;">July 1, 2024 - June 30, 2025</p>
+            <div class="info-grid">
+                <div class="info-item">
+                    <h3>Total Budget</h3>
+                    <p>$4,058,071</p>
+                </div>
+                <div class="info-item">
+                    <h3>Total Compensation</h3>
+                    <p>$653,564</p>
+                </div>
+                <div class="info-item">
+                    <h3>Current Expenses</h3>
+                    <p>$359,450</p>
+                </div>
+                <div class="info-item">
+                    <h3>Academic Compensation</h3>
+                    <p>$2,772,826</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div id="budget-charts"></div>
+        </div>
+    </div>
+
+    <script>
+        var data = {"data":[{"hole":0.4,"labels":["Compensation","Current Expenses"],"marker":{"colors":["#1e3c72","#667eea"]},"textinfo":"label+percent+value","texttemplate":"%{label}\u003cbr\u003e%{percent}\u003cbr\u003e$%{value:,.0f}","values":[653564.0599414555,359450.0],"type":"pie","domain":{"x":[0.0,0.45],"y":[0.7466666666666667,1.0]}},{"marker":{"color":["#2a5298","#764ba2"]},"text":["$2,772,826","$925,795"],"textposition":"outside","x":["Academic","Non-Academic"],"y":[2772826.1138373856,925794.8691560851],"type":"bar","xaxis":"x","yaxis":"y"},{"marker":{"color":["#1e3c72","#2a5298","#667eea"]},"text":["$717,692","$775,546","$654,000"],"textposition":"outside","x":["Standing Faculty","Practice\u002fLecture","Adjunct\u002fPT"],"y":[717692.0657257519,775546.0434339679,654000.0],"type":"bar","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#764ba2"},"orientation":"h","text":["$2,772,826","$925,795","$775,546","$717,692","$654,000","$653,564","$560,588","$503,888","$281,768","$215,236"],"textposition":"outside","x":[2772826.1138373856,925794.8691560851,775546.0434339679,717692.0657257519,654000.0,653564.0599414555,560588.0046776659,503887.82599632704,281768.08477445703,215236.0595937573],"y":["Total Academic Compensation","Total Non-Academic Compensation","Practice, Lecture A, and Faculty-Admin","Standing Faculty","Adjuncts, Lecturers, and Instructors","full-time employee benefits","Employee Benefits","Total Undergraduate Non-Academic Salaries","   Graduate","Total Graduate Non-Academic Salaries"],"type":"bar","xaxis":"x3","yaxis":"y3"},{"marker":{"color":"#667eea"},"text":["$359,450","$174,000","$114,000","$60,000","$42,000","$42,000","$37,700","$30,000","$30,000","$27,700"],"textposition":"outside","x":["Total Current Expense ","Course\u002fStudio Expenses (0050)","Undergraduate","Graduate ","Common Press - Program 4132","Undergraduate","Departmental Events  (0061)","Lecture Series  (0062)","Graduate ","Undergraduate"],"y":[359450.0,174000.0,114000.0,60000.0,42000.0,42000.0,37700.0,30000.0,30000.0,27700.0],"type":"bar","xaxis":"x4","yaxis":"y4"},{"hole":0.4,"labels":["Graduate Programs","Undergraduate Programs"],"marker":{"colors":["#2a5298","#667eea"]},"textinfo":"label+percent","values":[1217421.294898041,2840649.688095429],"type":"pie","domain":{"x":[0.55,1.0],"y":[0.0,0.25333333333333335]}}],"layout":{"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.55,1.0]},"yaxis":{"anchor":"x","domain":[0.7466666666666667,1.0]},"xaxis2":{"anchor":"y2","domain":[0.0,0.45],"title":{"text":"Category"}},"yaxis2":{"anchor":"x2","domain":[0.37333333333333335,0.6266666666666667],"title":{"text":"Amount ($)"}},"xaxis3":{"anchor":"y3","domain":[0.55,1.0],"title":{"text":"Amount ($)"}},"yaxis3":{"anchor":"x3","domain":[0.37333333333333335,0.6266666666666667]},"xaxis4":{"anchor":"y4","domain":[0.0,0.45],"title":{"text":"Category"}},"yaxis4":{"anchor":"x4","domain":[0.0,0.25333333333333335],"title":{"text":"Amount ($)"}},"annotations":[{"font":{"size":16},"showarrow":false,"text":"Budget Overview","x":0.225,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Compensation Breakdown","x":0.775,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Academic Compensation Detail","x":0.225,"xanchor":"center","xref":"paper","y":0.6266666666666667,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Non-Academic Compensation","x":0.775,"xanchor":"center","xref":"paper","y":0.6266666666666667,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Current Expenses","x":0.225,"xanchor":"center","xref":"paper","y":0.25333333333333335,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Graduate vs Undergraduate Programs","x":0.775,"xanchor":"center","xref":"paper","y":0.25333333333333335,"yanchor":"bottom","yref":"paper"}],"title":{"font":{"size":24,"color":"#1e3c72"},"text":"Fiscal Year 2025 Master Budget - $4,058,071"},"showlegend":false,"height":1400}};
+        Plotly.newPlot('budget-charts', data.data, data.layout, {responsive: true});
+    </script>
+</body>
+</html>
