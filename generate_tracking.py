@@ -174,28 +174,20 @@ def fmt(v):
     return f'${v:,.2f}'
 
 
-def progress_bar(spent, budget, committed=0):
-    """
-    Returns HTML for a progress bar.
-    spent = FYTD actuals, committed = committed funds
-    """
+def progress_bar(spent, budget):
+    """Returns HTML for a progress bar showing actuals vs budget."""
     if budget <= 0:
-        # No budget — show how much was spent as an alert
         return f"<div class='progress-wrap'><span class='no-budget'>No budget allocated — {fmt(spent)} spent</span></div>"
 
-    spent_pct     = min(spent / budget * 100, 100)
-    committed_pct = min(committed / budget * 100, max(0, 100 - spent_pct))
-    total_pct     = (spent + committed) / budget * 100
-    over = total_pct > 100
-
-    bar_class = 'bar-over' if over else ('bar-warn' if total_pct > 85 else 'bar-ok')
+    spent_pct = min(spent / budget * 100, 100)
+    over      = spent > budget
+    bar_class = 'bar-over' if over else ('bar-warn' if spent_pct > 85 else 'bar-ok')
     label_pct = f'{spent / budget * 100:.1f}%'
 
     return f"""
     <div class='progress-wrap'>
         <div class='progress-track'>
             <div class='progress-fill {bar_class}' style='width:{spent_pct:.1f}%'></div>
-            <div class='progress-committed' style='width:{committed_pct:.1f}%'></div>
         </div>
         <span class='progress-label {'over-label' if over else ''}'>{label_pct} spent</span>
     </div>"""
@@ -210,29 +202,25 @@ def stat_card(label, value, sub='', accent='#50c878'):
     </div>"""
 
 
-def section_table(title, rows, show_committed=True):
-    """Build an HTML table for a list of category dicts."""
+def section_table(title, rows):
+    """Build an HTML table for a list of category dicts (budget, actuals, available)."""
     over_count = sum(1 for r in rows if r.get('budget', 0) > 0
-                     and (r.get('actuals', 0) + r.get('committed', 0)) > r.get('budget', 0))
+                     and r.get('actuals', 0) > r.get('budget', 0))
     alert = f"<span class='alert-badge'>{over_count} over budget</span>" if over_count else ''
 
     html = f"<div class='section-block'><h3>{title} {alert}</h3>"
     html += "<table class='track-table'><thead><tr>"
     html += "<th>Category</th><th>Budget</th><th>FYTD Actual</th>"
-    if show_committed:
-        html += "<th>Committed</th>"
     html += "<th>Available</th><th>Progress</th></tr></thead><tbody>"
 
     for r in rows:
         b  = r.get('budget', 0)
         a  = r.get('actuals', 0)
-        co = r.get('committed', 0)
         av = r.get('available', 0)
         name = r.get('name', r.get('cat', ''))
 
-        total_used = a + co
-        is_over = b > 0 and total_used > b
-        is_warn = b > 0 and total_used / b > 0.85 and not is_over
+        is_over = b > 0 and a > b
+        is_warn = b > 0 and a / b > 0.85 and not is_over
         row_class = 'row-over' if is_over else ('row-warn' if is_warn else '')
 
         av_class = 'neg' if av < 0 else ''
@@ -241,10 +229,8 @@ def section_table(title, rows, show_committed=True):
         html += f"<td class='cat-name'>{name}</td>"
         html += f"<td>{fmt(b) if b else '—'}</td>"
         html += f"<td>{fmt(a)}</td>"
-        if show_committed:
-            html += f"<td>{fmt(co) if co else '—'}</td>"
         html += f"<td class='{av_class}'>{fmt(av)}</td>"
-        html += f"<td>{progress_bar(a, b, co)}</td>"
+        html += f"<td>{progress_bar(a, b)}</td>"
         html += "</tr>"
 
     html += "</tbody></table></div>"
@@ -263,7 +249,9 @@ def generate_tracking_page(data):
     total_spent_pct = pct(t.get('actuals', 0), t.get('budget', 0))
     pct_label = f'{total_spent_pct:.1f}%' if total_spent_pct is not None else 'N/A'
 
-    ug_cats_html = section_table('Undergraduate Current Expense Categories', data['ug_cats'])
+    EXCLUDE_CODES = {'50', '503'}
+    ug_filtered  = [r for r in data['ug_cats'] if r['code'] not in EXCLUDE_CODES]
+    ug_cats_html = section_table('Undergraduate Current Expense Categories', ug_filtered)
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -370,16 +358,14 @@ def generate_tracking_page(data):
     <div class="stats-row">
         {stat_card('TOTAL BUDGET',     fmt(t.get('budget', 0)),   'FY26 Approved')}
         {stat_card('FYTD ACTUALS',     fmt(t.get('actuals', 0)),  f'{pct_label} of budget', '#4a90e2')}
-        {stat_card('COMMITTED',        fmt(t.get('committed', 0)),'Encumbered funds', '#f0a500')}
-        {stat_card('AVAILABLE BALANCE',fmt(t.get('available', 0)),'Unspent + uncommitted',
+        {stat_card('AVAILABLE BALANCE',fmt(t.get('available', 0)),'Unspent balance',
                    '#e74c3c' if t.get('available', 0) < 0 else '#50c878')}
     </div>
 
-    {progress_bar(t.get('actuals', 0), t.get('budget', 0), t.get('committed', 0))}
+    {progress_bar(t.get('actuals', 0), t.get('budget', 0))}
 
     <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:#50c878"></div> Spent (FYTD Actuals)</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#f0a500"></div> Committed</div>
         <div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div> Over budget</div>
     </div>
 
@@ -392,22 +378,20 @@ def generate_tracking_page(data):
             <div class="comp-nums">
                 <div class="comp-num"><div class="label">Budget</div><div class="val">{fmt(ac.get('budget',0))}</div></div>
                 <div class="comp-num"><div class="label">FYTD Actual</div><div class="val green">{fmt(ac.get('actuals',0))}</div></div>
-                <div class="comp-num"><div class="label">Committed</div><div class="val">{fmt(ac.get('committed',0))}</div></div>
                 <div class="comp-num"><div class="label">Available</div>
                     <div class="val {'red' if ac.get('available',0) < 0 else 'green'}">{fmt(ac.get('available',0))}</div></div>
             </div>
-            {progress_bar(ac.get('actuals',0), ac.get('budget',0), ac.get('committed',0))}
+            {progress_bar(ac.get('actuals',0), ac.get('budget',0))}
         </div>
         <div class="comp-card">
             <h4>Non-Academic Salaries</h4>
             <div class="comp-nums">
                 <div class="comp-num"><div class="label">Budget</div><div class="val">{fmt(na.get('budget',0))}</div></div>
                 <div class="comp-num"><div class="label">FYTD Actual</div><div class="val green">{fmt(na.get('actuals',0))}</div></div>
-                <div class="comp-num"><div class="label">Committed</div><div class="val">{fmt(na.get('committed',0))}</div></div>
                 <div class="comp-num"><div class="label">Available</div>
                     <div class="val {'red' if na.get('available',0) < 0 else 'green'}">{fmt(na.get('available',0))}</div></div>
             </div>
-            {progress_bar(na.get('actuals',0), na.get('budget',0), na.get('committed',0))}
+            {progress_bar(na.get('actuals',0), na.get('budget',0))}
         </div>
     </div>
 
