@@ -249,8 +249,15 @@ def generate_tracking_page(data):
     total_spent_pct = pct(t.get('actuals', 0), t.get('budget', 0))
     pct_label = f'{total_spent_pct:.1f}%' if total_spent_pct is not None else 'N/A'
 
-    EXCLUDE_CODES = {'50', '503'}
-    ug_filtered  = [r for r in data['ug_cats'] if r['code'] not in EXCLUDE_CODES]
+    RENAME_CODES = {'50': 'Visitors'}
+    EXCLUDE_CODES = {'503'}
+    ug_filtered = []
+    for r in data['ug_cats']:
+        if r['code'] in EXCLUDE_CODES:
+            continue
+        if r['code'] in RENAME_CODES:
+            r = {**r, 'name': RENAME_CODES[r['code']]}
+        ug_filtered.append(r)
     ug_cats_html = section_table('Undergraduate Current Expense Categories', ug_filtered)
 
     html = f"""<!DOCTYPE html>
