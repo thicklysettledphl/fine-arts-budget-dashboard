@@ -6,29 +6,29 @@
     <title>Fine Arts Budget System - All Fiscal Years</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 50px 30px; text-align: center; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0d0d0d; min-height: 100vh; padding: 20px; color: #e0e0e0; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 50px 30px; text-align: center; border-bottom: 3px solid #4a90e2; border-radius: 10px 10px 0 0; }
         .header h1 { font-size: 3em; margin-bottom: 15px; }
         .header p { font-size: 1.2em; opacity: 0.9; }
-        .content { padding: 50px 30px; }
+        .content { background: #111; padding: 50px 30px; border-radius: 0 0 10px 10px; border: 1px solid #333; border-top: none; }
         .intro { text-align: center; margin-bottom: 40px; }
-        .intro h2 { color: #1e3c72; margin-bottom: 15px; }
-        .intro p { color: #666; font-size: 1.1em; }
+        .intro h2 { color: #4a90e2; margin-bottom: 15px; font-size: 1.8em; }
+        .intro p { color: #999; font-size: 1.1em; }
         .fy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; margin: 40px 0; }
-        .fy-card { background: white; border: 3px solid #e0e0e0; border-radius: 10px; padding: 25px; transition: all 0.3s; }
-        .fy-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-color: #667eea; }
+        .fy-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 25px; border-left: 4px solid #4a90e2; transition: all 0.3s; }
+        .fy-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(74,144,226,0.2); border-color: #4a90e2; }
         .fy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .fy-header h3 { color: #1e3c72; font-size: 1.4em; }
-        .badge { background: #28a745; color: white; padding: 5px 12px; border-radius: 15px; font-size: 0.8em; font-weight: bold; }
+        .fy-header h3 { color: #e0e0e0; font-size: 1.4em; }
+        .badge { background: #1a3a1a; color: #50c878; padding: 5px 12px; border-radius: 15px; font-size: 0.8em; font-weight: bold; border: 1px solid #50c878; }
         .fy-period { color: #666; margin-bottom: 20px; font-size: 0.95em; }
         .fy-actions { display: flex; gap: 10px; }
         .btn { flex: 1; padding: 12px 20px; text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; transition: all 0.3s; }
-        .btn-budget { background: #f0f7ff; color: #1e3c72; border: 2px solid #1e3c72; }
-        .btn-budget:hover { background: #1e3c72; color: white; }
-        .btn-tracking { background: #667eea; color: white; border: 2px solid #667eea; }
-        .btn-tracking:hover { background: #5568d3; transform: scale(1.02); }
-        .footer { background: #f8f9fa; padding: 30px; text-align: center; color: #666; }
+        .btn-budget { background: #1a2a3a; color: #4a90e2; border: 2px solid #4a90e2; }
+        .btn-budget:hover { background: #4a90e2; color: white; }
+        .btn-tracking { background: #4a90e2; color: white; border: 2px solid #4a90e2; }
+        .btn-tracking:hover { background: #357abd; }
+        .footer { text-align: center; padding: 30px; color: #555; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -46,7 +46,7 @@
             </div>
 
             <div class="fy-grid">
-                
+
         <div class="fy-card">
             <div class="fy-header">
                 <h3>Fiscal Year 2026</h3>
@@ -58,7 +58,7 @@
                 <a href="fy26_tracking.html" class="btn btn-tracking">📈 View Tracking</a>
             </div>
         </div>
-        
+
         <div class="fy-card">
             <div class="fy-header">
                 <h3>Fiscal Year 2025</h3>
@@ -70,7 +70,7 @@
                 <a href="fy25_tracking.html" class="btn btn-tracking">📈 View Tracking</a>
             </div>
         </div>
-        
+
         <div class="fy-card">
             <div class="fy-header">
                 <h3>Fiscal Year 2024</h3>
@@ -82,7 +82,7 @@
                 <a href="fy24_tracking.html" class="btn btn-tracking">📈 View Tracking</a>
             </div>
         </div>
-        
+
         <div class="fy-card">
             <div class="fy-header">
                 <h3>Fiscal Year 2023</h3>
@@ -94,7 +94,7 @@
                 <a href="fy23_tracking.html" class="btn btn-tracking">📈 View Tracking</a>
             </div>
         </div>
-        
+
             </div>
         </div>
 

@@ -44,11 +44,9 @@ def extract_budget_data():
         'total_academic': safe_float(df_summary.iloc[15, budget_col]),
     }
 
-    # Non-academic compensation without benefits
-    # Total Non-Academic Comp (Row 42) - Non-Academic Benefits (Row 40)
+    # Non-academic compensation including employee benefits
     total_nonacademic = safe_float(df_summary.iloc[41, budget_col])
-    nonacademic_benefits = safe_float(df_summary.iloc[39, budget_col])
-    budget_data['nonacademic_compensation'] = total_nonacademic - nonacademic_benefits
+    budget_data['nonacademic_compensation'] = total_nonacademic
 
     # Faculty counts
     budget_data['standing_faculty_count'] = 7
@@ -261,9 +259,14 @@ def generate_fy26_budget():
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0d0d0d; color: #e0e0e0; }}
-        .header {{ background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 40px 30px; color: white; text-align: center; border-bottom: 3px solid #4a90e2; }}
+        .header {{ background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 40px 30px; color: white; text-align: center; border-bottom: 3px solid #4a90e2; position: relative; }}
         .header h1 {{ font-size: 2.5em; margin-bottom: 10px; }}
         .header p {{ font-size: 1.1em; opacity: 0.9; }}
+        .header .back-link {{ display: inline-block; margin-top: 15px; padding: 10px 20px; background: rgba(74,144,226,0.2); color: #4a90e2; text-decoration: none; border-radius: 5px; border: 1px solid #4a90e2; transition: background 0.3s; }}
+        .header .back-link:hover {{ background: #4a90e2; color: white; }}
+        .header .export-btn {{ display: inline-block; margin-top: 15px; margin-left: 12px; padding: 10px 20px; background: rgba(80,200,120,0.15); color: #50c878; text-decoration: none; border-radius: 5px; border: 1px solid #50c878; cursor: pointer; transition: background 0.3s; font-size: 1em; }}
+        .header .export-btn:hover {{ background: #50c878; color: #0d0d0d; }}
+        .header .export-btn.loading {{ opacity: 0.6; cursor: wait; }}
         .container {{ max-width: 1400px; margin: 30px auto; padding: 0 20px; }}
 
         /* Tabs */
@@ -285,6 +288,11 @@ def generate_fy26_budget():
         .chart-container {{ background: #1a1a1a; padding: 30px; border-radius: 10px; border: 1px solid #333; margin-bottom: 30px; }}
 
         .expense-list {{ background: #1a1a1a; padding: 30px; border-radius: 10px; border: 1px solid #333; }}
+        .expense-chart-row {{ display: flex; gap: 30px; align-items: flex-start; margin-bottom: 30px; }}
+        .expense-chart-row .chart-box {{ flex: 1; min-width: 0; background: #1a1a1a; padding: 30px; border-radius: 10px; border: 1px solid #333; }}
+        .expense-covered {{ flex: 0 0 320px; background: #1a1a1a; padding: 30px; border-radius: 10px; border: 1px solid #333; }}
+        .expense-covered h3 {{ color: #4a90e2; font-size: 1.1em; margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.05em; }}
+        .covered-item {{ padding: 12px 15px; background: #252525; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid #50c878; color: #e0e0e0; font-size: 0.95em; line-height: 1.4; }}
         .expense-item {{ display: flex; justify-content: space-between; padding: 15px 20px; background: #252525; margin-bottom: 12px; border-radius: 8px; border-left: 4px solid #3498db; }}
         .expense-item-clickable {{ cursor: pointer; transition: all 0.3s; }}
         .expense-item-clickable:hover {{ background: #2a2a2a; transform: translateX(5px); border-left-color: #4a90e2; }}
@@ -301,6 +309,8 @@ def generate_fy26_budget():
     <div class="header">
         <h1>📊 Fiscal Year 2026 Master Budget</h1>
         <p>July 1, 2025 - June 30, 2026 | Fine Arts Department</p>
+        <a href="index.html" class="back-link">← All Fiscal Years</a>
+        <a href="fy26_budget_report.pdf" class="export-btn" download>⬇ Export PDF Report</a>
     </div>
 
     <div class="container">
@@ -391,8 +401,18 @@ def generate_fy26_budget():
                 </div>
             </div>
 
-            <div class="chart-container">
-                <div id="expense-chart"></div>
+            <div class="expense-chart-row">
+                <div class="chart-box">
+                    <div id="expense-chart"></div>
+                </div>
+                <div class="expense-covered">
+                    <h3>Costs Covered by Current Expenses</h3>
+                    <div class="covered-item">Department Administrative Expenses</div>
+                    <div class="covered-item">Internal Facility Expenses</div>
+                    <div class="covered-item">Internal Technology Expenses</div>
+                    <div class="covered-item">Department Extra-Curricular Expenses</div>
+                    <div class="covered-item">Support for All Courses in Fine Arts and Design</div>
+                </div>
             </div>
 
             <div class="info-box">
@@ -444,6 +464,12 @@ def generate_fy26_budget():
         f.write(html_content)
 
     print("\n✓ Saved: fy26_budget.html")
+
+    # Always regenerate PDF so the export button is current
+    print("\nRegenerating PDF report...")
+    from generate_pdf_report import generate_pdf
+    generate_pdf('/Users/KLAW/project/budget/fy26_budget_report.pdf')
+
     print("\nTo view: open fy26_budget.html")
 
 if __name__ == '__main__':
